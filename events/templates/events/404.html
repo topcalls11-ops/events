@@ -1,0 +1,292 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}404 - Page Not Found - EventSphere{% endblock %}
+
+{% block content %}
+
+<div class="error-page">
+  <div class="error-container">
+
+    <!-- Animated 404 -->
+    <div class="error-visual">
+      <div class="error-number">
+        <span class="en-4 en-left">4</span>
+        <div class="en-circle">
+          <div class="en-circle-inner">
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="en-orbit"></div>
+        </div>
+        <span class="en-4 en-right">4</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="error-content">
+      <span class="error-badge">
+        <i class="fas fa-exclamation-triangle"></i>
+        Page Not Found
+      </span>
+
+      <h1>Oops! Lost in Space? 🚀</h1>
+
+      <p class="error-desc">
+        The page you're looking for doesn't exist,
+        has been moved, or is temporarily unavailable.
+        Let's get you back on track!
+      </p>
+
+      <!-- Suggestions -->
+      <div class="error-suggestions">
+        <p class="es-title">
+          <i class="fas fa-lightbulb"></i>
+          Try these instead
+        </p>
+        <div class="es-grid">
+          <a href="{% url 'home' %}" class="es-card">
+            <div class="es-icon">
+              <i class="fas fa-home"></i>
+            </div>
+            <span>Go Home</span>
+          </a>
+          <a href="{% url 'events' %}" class="es-card">
+            <div class="es-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <span>Browse Events</span>
+          </a>
+          <a href="{% url 'contact' %}" class="es-card">
+            <div class="es-icon">
+              <i class="fas fa-headset"></i>
+            </div>
+            <span>Get Help</span>
+          </a>
+          <a href="{% url 'faq' %}" class="es-card">
+            <div class="es-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <span>View FAQ</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="error-actions">
+        <button onclick="history.back()"
+                class="btn btn-ghost">
+          <i class="fas fa-arrow-left"></i>
+          Go Back
+        </button>
+        <a href="{% url 'home' %}"
+           class="btn btn-gradient">
+          <i class="fas fa-home"></i>
+          Back to Home
+        </a>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+.error-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.error-container {
+  max-width: 580px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ─── 404 Visual ────────────────────────────── */
+.error-visual {
+  margin-bottom: 2.5rem;
+}
+
+.error-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.en-4 {
+  font-size: clamp(5rem, 15vw, 9rem);
+  font-weight: 900;
+  letter-spacing: -4px;
+  line-height: 1;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.8;
+}
+
+.en-circle {
+  position: relative;
+  width: clamp(80px, 15vw, 130px);
+  height: clamp(80px, 15vw, 130px);
+}
+
+.en-circle-inner {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,
+    rgba(108,99,255,0.2),
+    rgba(79,172,254,0.1));
+  border: 1px solid rgba(108,99,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  color: var(--purple);
+  box-shadow: 0 0 30px rgba(108,99,255,0.2);
+  animation: searchPulse 2s ease-in-out infinite;
+}
+
+@keyframes searchPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.en-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(108,99,255,0.2);
+  animation: orbit 8s linear infinite;
+}
+
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Content ───────────────────────────────── */
+.error-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 1rem;
+  background: rgba(250,112,154,0.1);
+  border: 1px solid rgba(250,112,154,0.25);
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fa709a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 1.25rem;
+}
+
+.error-content h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.85rem;
+}
+
+.error-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+/* Suggestions */
+.error-suggestions {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.es-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.es-title i { color: var(--purple); }
+
+.es-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.es-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  background: var(--dark-3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.es-card:hover {
+  border-color: rgba(108,99,255,0.4);
+  color: var(--text-primary);
+  transform: translateY(-3px);
+}
+
+.es-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: rgba(108,99,255,0.1);
+  border: 1px solid rgba(108,99,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--purple);
+  transition: var(--transition);
+}
+
+.es-card:hover .es-icon {
+  background: rgba(108,99,255,0.2);
+}
+
+/* Actions */
+.error-actions {
+  display: flex;
+  gap: 0.85rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 480px) {
+  .es-grid { grid-template-columns: repeat(2, 1fr); }
+  .error-actions { flex-direction: column; }
+  .error-actions .btn { width: 100%; justify-content: center; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,66 @@
+
+
+
+
+
+
+
+{% extends 'events/dashboard_base.html' %}
+{% block breadcrumb %}Delete Event{% endblock %}
+
+{% block title %}Delete Event - EventSphere{% endblock %}
+
+{% block content %}
+<div style="min-height:80vh;display:flex;align-items:center;
+            justify-content:center;padding:6rem 2rem;
+            position:relative;z-index:1;">
+  <div style="max-width:460px;width:100%;text-align:center;">
+
+    <div style="width:80px;height:80px;border-radius:50%;
+                background:rgba(250,112,154,0.15);
+                border:1px solid rgba(250,112,154,0.3);
+                display:flex;align-items:center;justify-content:center;
+                margin:0 auto 1.5rem;font-size:2rem;color:#fa709a;">
+      <i class="fas fa-trash-alt"></i>
+    </div>
+
+    <h1 style="font-size:1.75rem;font-weight:900;margin-bottom:0.75rem;">
+      Delete Event?
+    </h1>
+
+    <p style="color:var(--text-secondary);margin-bottom:0.5rem;">
+      You are about to permanently delete:
+    </p>
+
+    <div style="padding:1rem;background:rgba(250,112,154,0.08);
+                border:1px solid rgba(250,112,154,0.2);
+                border-radius:10px;margin-bottom:1.5rem;">
+      <strong style="font-size:1.05rem;color:var(--pink);">
+        "{{ event.title }}"
+      </strong>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.3rem;">
+        {{ event.registered_count }} student(s) registered •
+        {{ event.date|date:"M d, Y" }}
+      </p>
+    </div>
+
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:2rem;">
+      ⚠️ This will also delete all registrations. This cannot be undone.
+    </p>
+
+    <div style="display:flex;gap:1rem;justify-content:center;">
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost">
+        <i class="fas fa-arrow-left"></i>
+        Cancel
+      </a>
+      <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+          <i class="fas fa-trash"></i>
+          Yes, Delete Event
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

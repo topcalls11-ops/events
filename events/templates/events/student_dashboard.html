@@ -1,0 +1,354 @@
+{% extends 'events/dashboard_base.html' %}
+
+{% block title %}Student Dashboard - EventSphere{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Welcome -->
+<div class="pd-welcome-row">
+  <div>
+    <h1 class="pd-title">
+      Hey {{ user.first_name|default:"Student" }}! 🎓
+    </h1>
+    <p class="pd-subtitle">
+      Discover events and manage your registrations.
+    </p>
+  </div>
+  <a href="{% url 'events' %}" class="btn btn-gradient">
+    <i class="fas fa-compass"></i>
+    Browse Events
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="pd-stats-grid">
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(108,99,255,0.2)">
+        <i class="fas fa-ticket-alt" style="color:#6c63ff"></i>
+      </div>
+      <span class="pd-stat-trend trend-up">
+        <i class="fas fa-arrow-up"></i> Total
+      </span>
+    </div>
+    <div class="pd-stat-num" data-count="{{ registrations|length }}">0</div>
+    <div class="pd-stat-label">Registered Events</div>
+    <div class="pd-stat-bar">
+      <div style="width:75%;
+                  background:linear-gradient(135deg,#6c63ff,#4facfe)">
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(67,233,123,0.2)">
+        <i class="fas fa-calendar-check" style="color:#43e97b"></i>
+      </div>
+      <span class="pd-stat-trend trend-up">
+        <i class="fas fa-arrow-up"></i> Soon
+      </span>
+    </div>
+    <div class="pd-stat-num" data-count="{{ upcoming|length }}">0</div>
+    <div class="pd-stat-label">Upcoming Events</div>
+    <div class="pd-stat-bar">
+      <div style="width:60%;
+                  background:linear-gradient(135deg,#43e97b,#38f9d7)">
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(250,112,154,0.2)">
+        <i class="fas fa-history" style="color:#fa709a"></i>
+      </div>
+      <span class="pd-stat-trend trend-neutral">
+        <i class="fas fa-minus"></i> Done
+      </span>
+    </div>
+    <div class="pd-stat-num" data-count="{{ past|length }}">0</div>
+    <div class="pd-stat-label">Events Attended</div>
+    <div class="pd-stat-bar">
+      <div style="width:40%;
+                  background:linear-gradient(135deg,#fa709a,#fee140)">
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(79,172,254,0.2)">
+        <i class="fas fa-star" style="color:#4facfe"></i>
+      </div>
+      <span class="pd-stat-trend trend-up">
+        <i class="fas fa-arrow-up"></i> New
+      </span>
+    </div>
+    <div class="pd-stat-num" data-count="{{ all_events|length }}">0</div>
+    <div class="pd-stat-label">New Events Available</div>
+    <div class="pd-stat-bar">
+      <div style="width:90%;
+                  background:linear-gradient(135deg,#4facfe,#00f2fe)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Grid -->
+<div class="pd-bottom-grid">
+
+  <!-- My Upcoming -->
+  <div class="pd-card">
+    <div class="pd-card-header">
+      <h3><i class="fas fa-calendar-check"></i> Upcoming Events</h3>
+      <a href="{% url 'my_registrations' %}" class="pd-card-link">
+        All Tickets <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if upcoming %}
+    <div class="pd-event-list">
+      {% for reg in upcoming|slice:":5" %}
+      <div class="pd-event-item">
+        <div class="pd-event-thumb">
+          {% if reg.event.image %}
+            <img src="{{ reg.event.image.url }}" alt="" />
+          {% else %}
+            <div class="pd-event-thumb-ph">
+              <i class="fas fa-calendar"></i>
+            </div>
+          {% endif %}
+        </div>
+        <div class="pd-event-info">
+          <span class="pd-event-title">{{ reg.event.title }}</span>
+          <span class="pd-event-date">
+            <i class="fas fa-calendar-alt"></i>
+            {{ reg.event.date|date:"M d, Y • h:i A" }}
+          </span>
+        </div>
+        <a href="{% url 'event_detail' reg.event.pk %}"
+           class="pd-view-btn">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="pd-empty">
+      <i class="fas fa-calendar-times"></i>
+      <p>No upcoming events. Go register for some!</p>
+      <a href="{% url 'events' %}" class="btn btn-gradient btn-sm">
+        <i class="fas fa-compass"></i> Explore
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Discover Events -->
+  <div class="pd-card">
+    <div class="pd-card-header">
+      <h3><i class="fas fa-compass"></i> Discover Events</h3>
+      <a href="{% url 'events' %}" class="pd-card-link">
+        See All <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if all_events %}
+    <div class="pd-event-list">
+      {% for event in all_events|slice:":5" %}
+      <div class="pd-event-item">
+        <div class="pd-event-thumb">
+          {% if event.image %}
+            <img src="{{ event.image.url }}" alt="" />
+          {% else %}
+            <div class="pd-event-thumb-ph">
+              <i class="fas fa-calendar"></i>
+            </div>
+          {% endif %}
+        </div>
+        <div class="pd-event-info">
+          <span class="pd-event-title">{{ event.title }}</span>
+          <span class="pd-event-date">
+            <i class="fas fa-university"></i>
+            {{ event.college }}
+          </span>
+        </div>
+        <a href="{% url 'event_detail' event.pk %}"
+           class="pd-view-btn">
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="pd-empty">
+      <i class="fas fa-search"></i>
+      <p>No events available right now</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* Reuse professor dashboard styles */
+.pd-welcome-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pd-title {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.pd-subtitle { font-size: 0.875rem; color: var(--text-muted); }
+
+.pd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.pd-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.pd-stat-card:hover {
+  border-color: rgba(108,99,255,0.3);
+  transform: translateY(-3px);
+}
+
+.pd-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.pd-stat-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.pd-stat-trend {
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50px;
+}
+
+.trend-up { background: rgba(67,233,123,0.15); color: #43e97b; }
+.trend-neutral { background: rgba(79,172,254,0.15); color: #4facfe; }
+
+.pd-stat-num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pd-stat-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+.pd-stat-bar { height: 4px; background: var(--glass-border); border-radius: 4px; overflow: hidden; }
+.pd-stat-bar div { height: 100%; border-radius: 4px; }
+
+.pd-bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+
+.pd-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius); overflow: hidden; }
+
+.pd-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.pd-card-header h3 { font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--text-secondary); }
+.pd-card-header h3 i { color: var(--purple); }
+.pd-card-link { font-size: 0.75rem; color: var(--purple); font-weight: 600; display: flex; align-items: center; gap: 0.3rem; }
+
+.pd-event-list { padding: 0.5rem 0; }
+.pd-event-item { display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); transition: var(--transition); }
+.pd-event-item:hover { background: rgba(108,99,255,0.05); }
+.pd-event-item:last-child { border-bottom: none; }
+
+.pd-event-thumb { width: 42px; height: 42px; border-radius: 8px; overflow: hidden; background: var(--dark-3); flex-shrink: 0; }
+.pd-event-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.pd-event-thumb-ph { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--purple); opacity: 0.4; }
+
+.pd-event-info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.pd-event-title { font-size: 0.82rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pd-event-date { font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem; margin-top: 0.15rem; }
+
+.pd-view-btn {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: rgba(108,99,255,0.1);
+  border: 1px solid rgba(108,99,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--purple);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.pd-view-btn:hover { background: var(--purple); color: white; }
+
+.pd-empty { padding: 2.5rem; text-align: center; color: var(--text-muted); }
+.pd-empty i { font-size: 2rem; margin-bottom: 0.75rem; display: block; opacity: 0.3; }
+.pd-empty p { font-size: 0.82rem; margin-bottom: 1rem; }
+
+@media (max-width: 1200px) { .pd-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) { .pd-stats-grid { grid-template-columns: 1fr 1fr; } .pd-bottom-grid { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .pd-stats-grid { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.getAttribute('data-count')) || 0;
+    let count = 0;
+    const step = Math.max(1, Math.ceil(target / 30));
+    const timer = setInterval(() => {
+      count = Math.min(count + step, target);
+      el.textContent = count;
+      if (count >= target) clearInterval(timer);
+    }, 40);
+  });
+});
+</script>
+{% endblock %}

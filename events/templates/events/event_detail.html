@@ -1,0 +1,815 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}{{ event.title }} - EventSphere{% endblock %}
+
+{% block content %}
+
+<div class="detail-page">
+  <div class="page-container">
+
+    <!-- Back Button -->
+    <a href="{% url 'events' %}" class="back-btn">
+      <i class="fas fa-arrow-left"></i>
+      Back to Events
+    </a>
+
+    <div class="detail-grid">
+
+      <!-- ═══ LEFT COLUMN: Main Info ══════════════════ -->
+      <div class="detail-main">
+
+        <!-- Hero Image -->
+        <div class="detail-img-wrap">
+          {% if event.image %}
+            <img src="{{ event.image.url }}" alt="{{ event.title }}" />
+          {% else %}
+            <div class="detail-img-placeholder">
+              <i class="fas fa-calendar-alt"></i>
+              <span>{{ event.get_category_display }} Event</span>
+            </div>
+          {% endif %}
+
+          <!-- Badges -->
+          <div class="detail-badges">
+            <span class="category-badge">
+              {{ event.get_category_display }}
+            </span>
+            {% if event.is_upcoming %}
+              <span class="status-badge status-live">
+                <span class="pulse-dot"></span> Upcoming
+              </span>
+            {% else %}
+              <span class="status-badge status-ended">Ended</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Title & Meta -->
+        <div class="detail-content-block">
+          <h1 class="detail-title">{{ event.title }}</h1>
+
+          <!-- Quick Meta Row -->
+          <div class="detail-meta-row">
+            <div class="detail-meta-chip">
+              <i class="fas fa-university"></i>
+              {{ event.college }}
+            </div>
+            <div class="detail-meta-chip">
+              <i class="fas fa-calendar-alt"></i>
+              {{ event.date|date:"D, M d Y" }}
+            </div>
+            <div class="detail-meta-chip">
+              <i class="fas fa-clock"></i>
+              {{ event.date|date:"h:i A" }}
+            </div>
+            {% if event.venue %}
+            <div class="detail-meta-chip">
+              <i class="fas fa-map-marker-alt"></i>
+              {{ event.venue }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="detail-section-card">
+          <h2 class="detail-section-title">
+            <i class="fas fa-align-left"></i>
+            About this Event
+          </h2>
+          <div class="detail-description">
+            {{ event.description|linebreaks }}
+          </div>
+        </div>
+
+        <!-- Organizer -->
+        <div class="detail-section-card">
+          <h2 class="detail-section-title">
+            <i class="fas fa-user-tie"></i>
+            Organizer
+          </h2>
+          <div class="organizer-card">
+            <div class="organizer-avatar">
+              {{ event.created_by.first_name|first|upper }}
+              {{ event.created_by.last_name|first|upper }}
+            </div>
+            <div class="organizer-info">
+              <h3>
+                {{ event.created_by.get_full_name|default:event.created_by.username }}
+              </h3>
+              <p>{{ event.created_by.college|default:"College Professor" }}</p>
+              <span class="organizer-role">
+                <i class="fas fa-chalkboard-teacher"></i>
+                Professor
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ═══ RIGHT COLUMN: Register Card ═══════════════ -->
+      <div class="detail-sidebar">
+
+        <!-- Registration Card -->
+        <div class="register-card">
+          <div class="register-card-header">
+            <h3>
+              <i class="fas fa-ticket-alt"></i>
+              Register Now
+            </h3>
+            <p>Secure your spot today</p>
+          </div>
+
+          <!-- Spots Info -->
+          <div class="spots-section">
+            <div class="spots-numbers">
+              <span class="spots-filled">{{ registered_count }}</span>
+              <span class="spots-divider">/</span>
+              <span class="spots-total">{{ event.max_participants }}</span>
+              <span class="spots-label">Registered</span>
+            </div>
+            <div class="spots-bar-full">
+              <div class="spots-bar-fill"
+                style="width: {% widthratio registered_count event.max_participants 100 %}%">
+              </div>
+            </div>
+            <p class="spots-remaining">
+              {% with remaining=event.max_participants|add:"-1"|add:registered_count %}
+                {% if event.is_full %}
+                  <span class="text-danger">Event is full</span>
+                {% else %}
+                  <span class="text-success">
+                    {{ event.max_participants }} - {{ registered_count }}
+                    spots remaining
+                  </span>
+                {% endif %}
+              {% endwith %}
+            </p>
+          </div>
+
+          <!-- Form or Status -->
+          {% if not user.is_authenticated %}
+            <div class="register-prompt">
+              <i class="fas fa-lock"></i>
+              <p>Please login to register</p>
+              <a href="{% url 'login' %}?next={{ request.path }}"
+                 class="btn btn-gradient w-100">
+                <i class="fas fa-sign-in-alt"></i>
+                Login to Register
+              </a>
+            </div>
+
+          {% elif user.is_professor %}
+            <div class="register-prompt">
+              <i class="fas fa-info-circle"></i>
+              <p>Professors cannot register for events</p>
+            </div>
+
+          {% elif already_registered %}
+            <div class="already-registered">
+              <div class="check-circle">
+                <i class="fas fa-check"></i>
+              </div>
+              <h4>You're Registered! 🎉</h4>
+              <p>You have successfully registered for this event.</p>
+              <a href="{% url 'my_registrations' %}"
+                 class="btn btn-ghost w-100 mt-2">
+                <i class="fas fa-ticket-alt"></i>
+                View My Registrations
+              </a>
+            </div>
+
+          {% elif event.is_full %}
+            <div class="register-prompt">
+              <i class="fas fa-times-circle"
+                 style="color: #fa709a;"></i>
+              <p>This event is full</p>
+            </div>
+
+          {% elif not event.is_upcoming %}
+            <div class="register-prompt">
+              <i class="fas fa-history"
+                 style="color: var(--text-muted);"></i>
+              <p>This event has ended</p>
+            </div>
+
+          {% else %}
+            <!-- Registration Form -->
+            <form method="POST" class="register-form">
+              {% csrf_token %}
+
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                  <ul class="errorlist">
+                    {% for error in form.name.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                  <ul class="errorlist">
+                    {% for error in form.email.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                  <ul class="errorlist">
+                    {% for error in form.phone.errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              </div>
+
+              <button type="submit" class="btn btn-gradient w-100 btn-register">
+                <i class="fas fa-check-circle"></i>
+                Confirm Registration
+              </button>
+            </form>
+          {% endif %}
+        </div>
+
+        <!-- Event Info Card -->
+        <div class="event-info-card glass-card">
+          <h4>Event Details</h4>
+          <div class="info-list">
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-tag"></i>
+              </div>
+              <div>
+                <span class="info-label">Category</span>
+                <span class="info-value">
+                  {{ event.get_category_display }}
+                </span>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-calendar"></i>
+              </div>
+              <div>
+                <span class="info-label">Date</span>
+                <span class="info-value">
+                  {{ event.date|date:"M d, Y" }}
+                </span>
+              </div>
+            </div>
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div>
+                <span class="info-label">Time</span>
+                <span class="info-value">
+                  {{ event.date|date:"h:i A" }}
+                </span>
+              </div>
+            </div>
+            {% if event.venue %}
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div>
+                <span class="info-label">Venue</span>
+                <span class="info-value">{{ event.venue }}</span>
+              </div>
+            </div>
+            {% endif %}
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div>
+                <span class="info-label">Max Capacity</span>
+                <span class="info-value">
+                  {{ event.max_participants }} participants
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Card -->
+        <div class="share-card glass-card">
+          <h4><i class="fas fa-share-alt"></i> Share Event</h4>
+          <div class="share-buttons">
+            <button class="share-btn" onclick="copyLink()">
+              <i class="fas fa-link"></i>
+              Copy Link
+            </button>
+            <a href="https://twitter.com/intent/tweet?text=Check out {{ event.title }}&url={{ request.build_absolute_uri }}"
+               target="_blank"
+               class="share-btn share-twitter">
+              <i class="fab fa-twitter"></i>
+              Twitter
+            </a>
+            <a href="https://wa.me/?text=Check out {{ event.title }} {{ request.build_absolute_uri }}"
+               target="_blank"
+               class="share-btn share-whatsapp">
+              <i class="fab fa-whatsapp"></i>
+              WhatsApp
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ─── Detail Page ───────────────────────────── */
+.detail-page {
+  padding: 6rem 0 5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  transition: var(--transition);
+}
+
+.back-btn:hover { color: var(--purple); }
+
+/* Grid Layout */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ─── Left Column ───────────────────────────── */
+.detail-main { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.detail-img-wrap {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  height: 400px;
+  background: var(--dark-3);
+}
+
+.detail-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.detail-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, var(--dark-3), #1e1e3f);
+  color: var(--text-muted);
+}
+
+.detail-img-placeholder i {
+  font-size: 4rem;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.4;
+}
+
+.detail-img-placeholder span {
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.4;
+}
+
+.detail-badges {
+  position: absolute;
+  top: 1rem; left: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.category-badge {
+  padding: 0.3rem 0.8rem;
+  background: rgba(108,99,255,0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  backdrop-filter: blur(10px);
+}
+
+.status-live {
+  background: rgba(67,233,123,0.2);
+  border: 1px solid rgba(67,233,123,0.4);
+  color: #43e97b;
+}
+
+.status-ended {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-muted);
+}
+
+/* Title & Meta */
+.detail-content-block { padding: 0 0.5rem; }
+
+.detail-title {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.detail-meta-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.detail-meta-chip i { color: var(--purple); font-size: 0.75rem; }
+
+/* Section Cards */
+.detail-section-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+}
+
+.detail-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.8rem;
+}
+
+.detail-section-title i { color: var(--purple); }
+
+.detail-description {
+  color: var(--text-secondary);
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+/* Organizer */
+.organizer-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.organizer-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--gradient-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.organizer-info h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+
+.organizer-info p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.organizer-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(108,99,255,0.15);
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--purple);
+}
+
+/* ─── Right Sidebar ─────────────────────────── */
+.detail-sidebar {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Register Card */
+.register-card {
+  background: linear-gradient(135deg,
+    rgba(108,99,255,0.15),
+    rgba(79,172,254,0.08));
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.register-card-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.register-card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.register-card-header h3 i { color: var(--purple); }
+
+.register-card-header p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Spots Section */
+.spots-section { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--glass-border); }
+
+.spots-numbers {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.spots-filled {
+  font-size: 2rem;
+  font-weight: 900;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.spots-divider { color: var(--text-muted); font-size: 1.5rem; }
+.spots-total { font-size: 1.5rem; font-weight: 700; color: var(--text-secondary); }
+.spots-label { font-size: 0.75rem; color: var(--text-muted); margin-left: 0.3rem; }
+
+.spots-bar-full {
+  height: 6px;
+  background: var(--glass-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.spots-bar-fill {
+  height: 100%;
+  background: var(--gradient-1);
+  border-radius: 6px;
+  transition: width 0.8s ease;
+  max-width: 100%;
+}
+
+.spots-remaining {
+  font-size: 0.75rem;
+}
+
+.text-success { color: #43e97b; }
+.text-danger { color: #fa709a; }
+
+/* Register Form */
+.register-form { padding: 1.25rem 1.5rem; }
+
+.btn-register {
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+  font-size: 0.9rem;
+}
+
+/* Register Prompt */
+.register-prompt {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.register-prompt i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  color: var(--purple);
+  opacity: 0.5;
+}
+
+.register-prompt p { font-size: 0.875rem; margin-bottom: 1rem; }
+
+/* Already Registered */
+.already-registered {
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.check-circle {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: rgba(67,233,123,0.15);
+  border: 2px solid #43e97b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.4rem;
+  color: #43e97b;
+}
+
+.already-registered h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.already-registered p { font-size: 0.8rem; color: var(--text-secondary); }
+
+/* Event Info Card */
+.event-info-card {
+  padding: 1.25rem;
+}
+
+.event-info-card h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.info-list { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.info-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(108,99,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
+.info-item div { display: flex; flex-direction: column; }
+
+.info-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Share Card */
+.share-card {
+  padding: 1.25rem;
+}
+
+.share-card h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.share-buttons { display: flex; gap: 0.5rem; }
+
+.share-btn {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.share-btn:hover { border-color: var(--purple); color: var(--purple); }
+.share-twitter:hover { border-color: #1da1f2; color: #1da1f2; }
+.share-whatsapp:hover { border-color: #25d366; color: #25d366; }
+
+.share-btn i { font-size: 1rem; }
+
+/* ─── Responsive ────────────────────────────── */
+@media (max-width: 968px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-sidebar { position: static; }
+}
+
+@media (max-width: 480px) {
+  .detail-img-wrap { height: 250px; }
+  .detail-meta-row { gap: 0.5rem; }
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    // Quick toast
+    const btn = document.querySelector('.share-btn');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
+    btn.style.borderColor = '#43e97b';
+    btn.style.color = '#43e97b';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+</script>
+{% endblock %}

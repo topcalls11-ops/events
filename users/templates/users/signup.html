@@ -1,0 +1,494 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Create Account - EventSphere{% endblock %}
+
+{% block content %}
+
+<div class="auth-page signup-page">
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <a href="{% url 'home' %}" class="nav-logo"
+         style="margin-bottom:2rem;display:inline-flex">
+        <i class="fas fa-star-of-life"></i>
+        Event<span>Sphere</span>
+      </a>
+
+      <h2>Join EventSphere 🚀</h2>
+      <p>Create your free account and start discovering amazing events at top colleges.</p>
+
+      <div class="auth-features">
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <div>
+            <strong>For Students</strong>
+            <span>Register for events with one click</span>
+          </div>
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <div>
+            <strong>For Professors</strong>
+            <span>Create and manage your events easily</span>
+          </div>
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <strong>100% Free</strong>
+            <span>No credit card required ever</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role Cards -->
+      <div class="role-showcase">
+        <div class="role-card student-role">
+          <i class="fas fa-user-graduate"></i>
+          <div>
+            <strong>Student</strong>
+            <span>View & Register</span>
+          </div>
+        </div>
+        <div class="role-vs">VS</div>
+        <div class="role-card professor-role">
+          <i class="fas fa-chalkboard-teacher"></i>
+          <div>
+            <strong>Professor</strong>
+            <span>Create & Manage</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-form-container">
+
+      <div class="auth-form-header">
+        <h1>Create Account</h1>
+        <p>
+          Already have one?
+          <a href="{% url 'login' %}" class="auth-link">Sign in here</a>
+        </p>
+      </div>
+
+      <form method="POST" class="auth-form" novalidate>
+        {% csrf_token %}
+
+        <!-- Role Selector (Top) -->
+        <div class="role-selector-wrap form-group">
+          <label class="form-label">
+            <i class="fas fa-id-badge"></i>
+            I am a...
+          </label>
+          <div class="role-toggle">
+            <input type="radio" name="role" id="role-student"
+                   value="student" checked hidden />
+            <label for="role-student" class="role-toggle-btn">
+              <i class="fas fa-user-graduate"></i>
+              Student
+            </label>
+            <input type="radio" name="role" id="role-professor"
+                   value="professor" hidden />
+            <label for="role-professor" class="role-toggle-btn">
+              <i class="fas fa-chalkboard-teacher"></i>
+              Professor
+            </label>
+          </div>
+        </div>
+
+        <!-- Name Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+              <div class="field-error">
+                {% for e in form.first_name.errors %}
+                  <span><i class="fas fa-exclamation-circle"></i>{{ e }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+              <div class="field-error">
+                {% for e in form.last_name.errors %}
+                  <span><i class="fas fa-exclamation-circle"></i>{{ e }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-at"></i>
+            Username
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="field-error">
+              {% for e in form.username.errors %}
+                <span><i class="fas fa-exclamation-circle"></i>{{ e }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="field-error">
+              {% for e in form.email.errors %}
+                <span><i class="fas fa-exclamation-circle"></i>{{ e }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- College + Phone Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-university"></i>
+              College
+            </label>
+            {{ form.college }}
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-phone"></i>
+              Phone
+            </label>
+            {{ form.phone }}
+          </div>
+        </div>
+
+        <!-- Password Row -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-lock"></i>
+              Password
+            </label>
+            <div class="password-wrapper">
+              {{ form.password1 }}
+              <button type="button" class="toggle-password"
+                      onclick="togglePassword(this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            {% if form.password1.errors %}
+              <div class="field-error">
+                {% for e in form.password1.errors %}
+                  <span><i class="fas fa-exclamation-circle"></i>{{ e }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-lock"></i>
+              Confirm Password
+            </label>
+            <div class="password-wrapper">
+              {{ form.password2 }}
+              <button type="button" class="toggle-password"
+                      onclick="togglePassword(this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            {% if form.password2.errors %}
+              <div class="field-error">
+                {% for e in form.password2.errors %}
+                  <span><i class="fas fa-exclamation-circle"></i>{{ e }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+          <div class="form-error-box">
+            <i class="fas fa-times-circle"></i>
+            {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+          </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-gradient w-100 auth-submit-btn">
+          <i class="fas fa-rocket"></i>
+          Create Free Account
+        </button>
+
+        <p class="auth-footer-note">
+          By signing up, you agree to our
+          <a href="#" class="auth-link">Terms</a> &
+          <a href="#" class="auth-link">Privacy Policy</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* Reuse auth styles from login */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  z-index: 1;
+  padding-top: 70px;
+}
+
+.auth-left {
+  background: linear-gradient(135deg,
+    rgba(108,99,255,0.15),
+    rgba(79,172,254,0.1));
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 3rem;
+}
+
+.auth-left-content { max-width: 420px; }
+
+.auth-left-content h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-left-content > p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.auth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auth-feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: rgba(108,99,255,0.2);
+  border: 1px solid rgba(108,99,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
+.auth-feature-item strong { display: block; font-size: 0.875rem; font-weight: 700; }
+.auth-feature-item span { font-size: 0.775rem; color: var(--text-muted); }
+
+/* Role Showcase */
+.role-showcase {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.role-card {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border-radius: 12px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+}
+
+.role-card i { font-size: 1.3rem; }
+
+.student-role i { color: var(--blue); }
+.professor-role i { color: var(--pink); }
+
+.role-card div { display: flex; flex-direction: column; }
+.role-card strong { font-size: 0.8rem; font-weight: 700; }
+.role-card span { font-size: 0.7rem; color: var(--text-muted); }
+
+.role-vs {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* Right Panel */
+.auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.auth-form-container { width: 100%; max-width: 480px; }
+
+.auth-form-header { margin-bottom: 1.5rem; }
+.auth-form-header h1 {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 0.3rem;
+}
+.auth-form-header p { font-size: 0.875rem; color: var(--text-secondary); }
+
+/* Form Row */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Role Toggle */
+.role-toggle {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.role-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+input[type="radio"]:checked + .role-toggle-btn {
+  background: rgba(108,99,255,0.2);
+  border-color: var(--purple);
+  color: var(--text-primary);
+}
+
+/* Password toggle, errors, submit - reuse from login */
+.password-wrapper { position: relative; }
+.password-wrapper .glass-input { padding-right: 3rem; }
+.toggle-password {
+  position: absolute; right: 1rem; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-size: 0.85rem; transition: var(--transition);
+}
+.toggle-password:hover { color: var(--purple); }
+
+.field-error {
+  margin-top: 0.4rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
+}
+.field-error span {
+  font-size: 0.75rem; color: #fa709a;
+  display: flex; align-items: center; gap: 0.3rem;
+}
+
+.form-error-box {
+  padding: 0.75rem 1rem;
+  background: rgba(250,112,154,0.1);
+  border: 1px solid rgba(250,112,154,0.3);
+  border-radius: var(--radius-sm);
+  color: #fa709a;
+  font-size: 0.8rem;
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-submit-btn { padding: 0.9rem; font-size: 0.95rem; margin-top: 0.5rem; }
+
+.auth-link { color: var(--purple); font-weight: 600; transition: var(--transition); }
+.auth-link:hover { color: var(--blue); }
+
+.auth-footer-note {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-page { grid-template-columns: 1fr; }
+  .auth-left { display: none; }
+  .auth-right { padding: 2rem 1.5rem; }
+  .form-row { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+function togglePassword(btn) {
+  const input = btn.closest('.password-wrapper').querySelector('input');
+  const icon  = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+}
+
+// Sync hidden role field with toggle
+document.querySelectorAll('.role-toggle-btn').forEach(label => {
+  label.addEventListener('click', () => {
+    document.querySelectorAll('.role-toggle-btn').forEach(l =>
+      l.style.background = '');
+  });
+});
+</script>
+{% endblock %}

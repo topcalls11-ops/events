@@ -1,0 +1,502 @@
+{% extends 'events/base.html' %}
+{% load static %}
+
+{% block title %}Login - EventSphere{% endblock %}
+
+{% block content %}
+
+<div class="auth-page">
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+
+      <a href="{% url 'home' %}" class="nav-logo"
+         style="margin-bottom:2rem;display:inline-flex">
+        <i class="fas fa-star-of-life"></i>
+        Event<span>Sphere</span>
+      </a>
+
+      <h2>Welcome Back! 👋</h2>
+      <p>
+        Login to discover and register for amazing
+        college events happening around you.
+      </p>
+
+      <div class="auth-features">
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div>
+            <strong>Browse Events</strong>
+            <span>Discover 100+ college events</span>
+          </div>
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div>
+            <strong>One Click Register</strong>
+            <span>Instant registration confirmation</span>
+          </div>
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <div>
+            <strong>Stay Updated</strong>
+            <span>Never miss an event again</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-deco-cards">
+        <div class="auth-deco-card">
+          <i class="fas fa-laptop-code"></i>
+          <span>Hackathon</span>
+        </div>
+        <div class="auth-deco-card">
+          <i class="fas fa-music"></i>
+          <span>Cultural</span>
+        </div>
+        <div class="auth-deco-card">
+          <i class="fas fa-running"></i>
+          <span>Sports</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-form-container">
+
+      <!-- Header -->
+      <div class="auth-form-header">
+        <h1>Sign In</h1>
+        <p>
+          Don't have an account?
+          <a href="{% url 'signup' %}" class="auth-link">
+            Create one free
+          </a>
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" class="auth-form" novalidate>
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-user"></i>
+            Username
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="field-error">
+              {% for error in form.username.errors %}
+                <span>
+                  <i class="fas fa-exclamation-circle"></i>
+                  {{ error }}
+                </span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Password + Forgot Link -->
+        <div class="form-group">
+          <div class="pass-label-row">
+            <label class="form-label">
+              <i class="fas fa-lock"></i>
+              Password
+            </label>
+            <a href="{% url 'forgot_password' %}"
+               class="forgot-link">
+              Forgot Password?
+            </a>
+          </div>
+
+          <div class="password-wrapper">
+            {{ form.password }}
+            <button type="button"
+                    class="toggle-password"
+                    onclick="togglePassword(this)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+
+          {% if form.password.errors %}
+            <div class="field-error">
+              {% for error in form.password.errors %}
+                <span>
+                  <i class="fas fa-exclamation-circle"></i>
+                  {{ error }}
+                </span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Non Field Errors -->
+        {% if form.non_field_errors %}
+          <div class="form-error-box">
+            <i class="fas fa-times-circle"></i>
+            {% for error in form.non_field_errors %}
+              {{ error }}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <!-- Submit -->
+        <button type="submit"
+                class="btn btn-gradient w-100 auth-submit-btn">
+          <i class="fas fa-sign-in-alt"></i>
+          Sign In to EventSphere
+        </button>
+
+      </form>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>OR</span>
+      </div>
+
+      <a href="{% url 'signup' %}" class="btn btn-ghost w-100">
+        <i class="fas fa-user-plus"></i>
+        Create New Account
+      </a>
+
+      <p class="auth-footer-note">
+        By continuing, you agree to our
+        <a href="#" class="auth-link">Terms of Service</a>
+        and
+        <a href="#" class="auth-link">Privacy Policy</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ─── Layout ────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  z-index: 1;
+  padding-top: 70px;
+}
+
+/* ─── Left Panel ────────────────────────────── */
+.auth-left {
+  background: linear-gradient(135deg,
+    rgba(108,99,255,0.15),
+    rgba(79,172,254,0.1));
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 3rem;
+}
+
+.auth-left-content { max-width: 420px; }
+
+.auth-left-content h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-left-content > p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+/* Features */
+.auth-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auth-feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: rgba(108,99,255,0.2);
+  border: 1px solid rgba(108,99,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
+.auth-feature-item strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.auth-feature-item span {
+  font-size: 0.775rem;
+  color: var(--text-muted);
+}
+
+/* Deco Cards */
+.auth-deco-cards { display: flex; gap: 0.75rem; }
+
+.auth-deco-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.85rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.auth-deco-card i {
+  font-size: 1.2rem;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-deco-card:hover {
+  border-color: rgba(108,99,255,0.4);
+  transform: translateY(-3px);
+}
+
+/* ─── Right Panel ───────────────────────────── */
+.auth-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.auth-form-container {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-form-header { margin-bottom: 2rem; }
+
+.auth-form-header h1 {
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin-bottom: 0.4rem;
+}
+
+.auth-form-header p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Password Row ──────────────────────────── */
+.pass-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.pass-label-row .form-label {
+  margin-bottom: 0;
+}
+
+/* Forgot Link */
+.forgot-link {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--purple);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.forgot-link:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+/* ─── Password Toggle ───────────────────────── */
+.password-wrapper { position: relative; }
+
+.password-wrapper .glass-input {
+  padding-right: 3rem !important;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: var(--transition);
+  padding: 4px;
+}
+
+.toggle-password:hover { color: var(--purple); }
+.toggle-password:focus { outline: none; }
+
+/* ─── Errors ────────────────────────────────── */
+.field-error {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.field-error span {
+  font-size: 0.75rem;
+  color: #fa709a;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.form-error-box {
+  padding: 0.75rem 1rem;
+  background: rgba(250,112,154,0.1);
+  border: 1px solid rgba(250,112,154,0.3);
+  border-radius: var(--radius-sm);
+  color: #fa709a;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* ─── Submit ────────────────────────────────── */
+.auth-submit-btn {
+  padding: 0.9rem;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+/* ─── Divider ───────────────────────────────── */
+.auth-divider {
+  position: relative;
+  text-align: center;
+  margin: 1.25rem 0;
+}
+
+.auth-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  height: 1px;
+  background: var(--glass-border);
+}
+
+.auth-divider span {
+  position: relative;
+  background: var(--dark);
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* ─── Footer Note ───────────────────────────── */
+.auth-footer-note {
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 1.25rem;
+  line-height: 1.6;
+}
+
+.auth-link {
+  color: var(--purple);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.auth-link:hover { color: var(--blue); }
+
+/* Form Label */
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.form-label i {
+  font-size: 0.75rem;
+  color: var(--purple);
+}
+
+/* ─── Responsive ────────────────────────────── */
+@media (max-width: 768px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+  .auth-left { display: none; }
+  .auth-right { padding: 2rem 1.5rem; }
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+function togglePassword(btn) {
+  const wrapper = btn.closest('.password-wrapper');
+  const input   = wrapper.querySelector('input');
+  const icon    = btn.querySelector('i');
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+  btn.blur();
+}
+</script>
+{% endblock %}

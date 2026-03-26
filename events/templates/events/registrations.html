@@ -1,0 +1,635 @@
+# Sirf pehli line change karo
+{% extends 'events/dashboard_base.html' %}
+{% block breadcrumb %}Registrations{% endblock %}
+{% load static %}
+
+{% block title %}Registrations - {{ event.title }}{% endblock %}
+
+{% block content %}
+
+<div class="regs-page">
+  <div class="page-container">
+
+    <!-- Back -->
+    <a href="{% url 'dashboard' %}" class="back-btn">
+      <i class="fas fa-arrow-left"></i>
+      Back to Dashboard
+    </a>
+
+    <!-- ─── Header ────────────────────────────── -->
+    <div class="regs-header">
+      <div class="regs-header-info">
+        <span class="section-badge">
+          <i class="fas fa-users"></i>
+          Registrations
+        </span>
+        <h1>{{ event.title }}</h1>
+        <div class="regs-event-meta">
+          <span>
+            <i class="fas fa-university"></i>
+            {{ event.college }}
+          </span>
+          <span>
+            <i class="fas fa-calendar-alt"></i>
+            {{ event.date|date:"M d, Y • h:i A" }}
+          </span>
+          <span>
+            <i class="fas fa-tag"></i>
+            {{ event.get_category_display }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="regs-quick-stats">
+        <div class="regs-qs-card" style="border-color:rgba(108,99,255,0.3)">
+          <span class="regs-qs-num" style="color:var(--purple)">
+            {{ registrations|length }}
+          </span>
+          <span class="regs-qs-label">Registered</span>
+        </div>
+        <div class="regs-qs-card" style="border-color:rgba(67,233,123,0.3)">
+          <span class="regs-qs-num" style="color:#43e97b">
+            {{ event.max_participants }}
+          </span>
+          <span class="regs-qs-label">Capacity</span>
+        </div>
+        <div class="regs-qs-card" style="border-color:rgba(79,172,254,0.3)">
+          <span class="regs-qs-num" style="color:#4facfe">
+            {% with rem=event.max_participants|add:"-0" %}
+              {{ event.max_participants|add:"-0" }}
+            {% endwith %}
+          </span>
+          <span class="regs-qs-label">Remaining</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Progress Bar ──────────────────────── -->
+    <div class="regs-progress-section glass-card">
+      <div class="regs-progress-header">
+        <span>Registration Progress</span>
+        <span class="regs-progress-pct">
+          {% widthratio registrations|length event.max_participants 100 %}%
+          Full
+        </span>
+      </div>
+      <div class="regs-progress-bar">
+        <div class="regs-progress-fill"
+          data-width="{% widthratio registrations|length event.max_participants 100 %}">
+        </div>
+      </div>
+      <div class="regs-progress-labels">
+        <span>0</span>
+        <span>{{ event.max_participants }} max</span>
+      </div>
+    </div>
+
+    <!-- ─── Table + Actions ───────────────────── -->
+    <div class="regs-table-section">
+
+      <!-- Table Header -->
+      <div class="regs-table-header">
+        <div class="regs-search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text"
+                 id="regSearch"
+                 placeholder="Search registrations..."
+                 class="regs-search" />
+        </div>
+        <div class="regs-table-actions">
+          <button class="btn btn-ghost btn-sm" onclick="exportCSV()">
+            <i class="fas fa-download"></i>
+            Export CSV
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="printPage()">
+            <i class="fas fa-print"></i>
+            Print
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      {% if registrations %}
+      <div class="regs-table-wrap">
+        <table class="regs-table" id="regsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Registered On</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for reg in registrations %}
+            <tr class="reg-row">
+              <td>
+                <span class="reg-num">{{ forloop.counter }}</span>
+              </td>
+              <td>
+                <div class="reg-name-cell">
+                  <div class="reg-mini-avatar">
+                    {{ reg.name|first|upper }}
+                  </div>
+                  <div>
+                    <strong>{{ reg.name }}</strong>
+                    <span class="reg-username">
+                      @{{ reg.user.username }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <a href="mailto:{{ reg.email }}"
+                   class="reg-email-link">
+                  {{ reg.email }}
+                </a>
+              </td>
+              <td>
+                <a href="tel:{{ reg.phone }}" class="reg-phone">
+                  <i class="fas fa-phone"></i>
+                  {{ reg.phone }}
+                </a>
+              </td>
+              <td>
+                <span class="reg-date">
+                  {{ reg.registered_at|date:"M d, Y" }}
+                </span>
+                <span class="reg-time">
+                  {{ reg.registered_at|date:"h:i A" }}
+                </span>
+              </td>
+              <td>
+                <span class="badge badge-success">
+                  <i class="fas fa-check"></i>
+                  Confirmed
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Footer -->
+      <div class="regs-table-footer">
+        <span class="text-muted">
+          Showing <strong id="visibleCount">{{ registrations|length }}</strong>
+          of {{ registrations|length }} registrations
+        </span>
+      </div>
+
+      {% else %}
+      <!-- No Registrations -->
+      <div class="regs-empty">
+        <div class="regs-empty-icon">
+          <i class="fas fa-users-slash"></i>
+        </div>
+        <h3>No registrations yet</h3>
+        <p>
+          Share your event to get students registered!
+        </p>
+        <a href="{% url 'event_detail' event.pk %}"
+           class="btn btn-gradient mt-3">
+          <i class="fas fa-share-alt"></i>
+          View Event Page
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ─── Registrations Page ────────────────────── */
+.regs-page {
+  padding: 6rem 0 5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.regs-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.regs-header-info h1 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.regs-event-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.regs-event-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.regs-event-meta i { color: var(--purple); font-size: 0.75rem; }
+
+/* Quick Stats */
+.regs-quick-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.regs-qs-card {
+  min-width: 90px;
+  padding: 1rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.regs-qs-num {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.regs-qs-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Progress Section */
+.regs-progress-section {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.regs-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
+.regs-progress-pct {
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.regs-progress-bar {
+  height: 8px;
+  background: var(--glass-border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+
+.regs-progress-fill {
+  height: 100%;
+  background: var(--gradient-1);
+  border-radius: 8px;
+  width: 0%;
+  transition: width 1s ease;
+}
+
+.regs-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Table Section */
+.regs-table-section {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Table Header */
+.regs-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.regs-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 320px;
+}
+
+.regs-search-wrap i {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.regs-search {
+  width: 100%;
+  padding: 0.6rem 0.9rem 0.6rem 2.2rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: var(--transition);
+}
+
+.regs-search::placeholder { color: var(--text-muted); }
+.regs-search:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+}
+
+.regs-table-actions { display: flex; gap: 0.5rem; }
+
+/* Table */
+.regs-table-wrap { overflow-x: auto; }
+
+.regs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.regs-table thead tr {
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.regs-table th {
+  padding: 0.9rem 1.5rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.regs-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+
+.reg-row {
+  transition: var(--transition);
+}
+
+.reg-row:hover {
+  background: rgba(108,99,255,0.05);
+}
+
+.reg-row:last-child td { border-bottom: none; }
+
+/* Table Cell Styles */
+.reg-num {
+  display: inline-flex;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  background: rgba(108,99,255,0.15);
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--purple);
+}
+
+.reg-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.reg-mini-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--gradient-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.reg-name-cell strong {
+  display: block;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.reg-username {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.reg-email-link {
+  color: var(--blue);
+  font-size: 0.82rem;
+  transition: var(--transition);
+}
+
+.reg-email-link:hover { color: var(--purple); }
+
+.reg-phone {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.reg-phone i { font-size: 0.7rem; color: var(--purple); }
+.reg-phone:hover { color: var(--text-primary); }
+
+.reg-date {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.reg-time {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.badge-success {
+  background: rgba(67,233,123,0.15);
+  color: #43e97b;
+  border: 1px solid rgba(67,233,123,0.3);
+}
+
+/* Table Footer */
+.regs-table-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--glass-border);
+  font-size: 0.8rem;
+}
+
+.regs-table-footer strong { color: var(--purple); }
+
+/* Empty */
+.regs-empty {
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.regs-empty-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: rgba(108,99,255,0.1);
+  border: 1px solid rgba(108,99,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.8rem;
+  color: var(--purple);
+  opacity: 0.4;
+}
+
+.regs-empty h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+.regs-empty p { font-size: 0.875rem; color: var(--text-secondary); }
+
+/* ─── Responsive ────────────────────────────── */
+@media (max-width: 768px) {
+  .regs-header { flex-direction: column; }
+  .regs-quick-stats { width: 100%; justify-content: space-between; }
+  .regs-qs-card { flex: 1; }
+  .regs-table-header { flex-direction: column; align-items: stretch; }
+  .regs-search-wrap { max-width: 100%; }
+  .regs-table th,
+  .regs-table td { padding: 0.75rem 1rem; }
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// ─── Animate Progress Bar ────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const fill = document.querySelector('.regs-progress-fill');
+  if (fill) {
+    const target = fill.getAttribute('data-width') || 0;
+    setTimeout(() => {
+      fill.style.width = Math.min(target, 100) + '%';
+    }, 300);
+  }
+});
+
+// ─── Search Filter ───────────────────────────
+const searchInput  = document.getElementById('regSearch');
+const rows         = document.querySelectorAll('.reg-row');
+const visibleCount = document.getElementById('visibleCount');
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase().trim();
+    let visible = 0;
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      if (text.includes(query)) {
+        row.style.display = '';
+        visible++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    if (visibleCount) visibleCount.textContent = visible;
+  });
+}
+
+// ─── Export CSV ──────────────────────────────
+function exportCSV() {
+  const table = document.getElementById('regsTable');
+  if (!table) return;
+
+  let csv = [];
+
+  // Headers
+  const headers = [...table.querySelectorAll('thead th')]
+    .map(th => th.textContent.trim())
+    .filter((_, i) => i !== 0); // skip #
+  csv.push(headers.join(','));
+
+  // Rows
+  table.querySelectorAll('tbody .reg-row').forEach((row, idx) => {
+    if (row.style.display === 'none') return;
+    const cells = [...row.querySelectorAll('td')].slice(1); // skip #
+    const values = cells.map(td => {
+      const text = td.textContent.trim().replace(/\n\s+/g, ' ');
+      return `"${text.replace(/"/g, '""')}"`;
+    });
+    csv.push(values.join(','));
+  });
+
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'registrations.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── Print ───────────────────────────────────
+function printPage() { window.print(); }
+</script>
+{% endblock %}

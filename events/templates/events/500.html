@@ -1,0 +1,94 @@
+{% extends 'events/base.html' %}
+
+{% block title %}500 - Server Error - EventSphere{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <div class="error-container">
+
+    <div class="error-visual">
+      <div class="error-number">
+        <span class="en-4 en-left">5</span>
+        <div class="en-circle">
+          <div class="en-circle-inner"
+               style="background:linear-gradient(135deg,
+                 rgba(250,112,154,0.2),
+                 rgba(247,151,30,0.1));
+                 border-color:rgba(250,112,154,0.3);
+                 color:#fa709a;">
+            <i class="fas fa-exclamation"></i>
+          </div>
+          <div class="en-orbit"></div>
+        </div>
+        <span class="en-4 en-right">0</span>
+      </div>
+    </div>
+
+    <div class="error-content">
+      <span class="error-badge"
+            style="background:rgba(247,151,30,0.1);
+                   border-color:rgba(247,151,30,0.25);
+                   color:#f7971e;">
+        <i class="fas fa-server"></i>
+        Server Error
+      </span>
+
+      <h1>Something Went Wrong 😟</h1>
+
+      <p class="error-desc">
+        Our server encountered an unexpected error.
+        Don't worry, it's not your fault! Our team
+        has been notified and we're working on it.
+      </p>
+
+      <div class="error-actions">
+        <button onclick="location.reload()"
+                class="btn btn-ghost">
+          <i class="fas fa-redo"></i>
+          Try Again
+        </button>
+        <a href="{% url 'home' %}"
+           class="btn btn-gradient">
+          <i class="fas fa-home"></i>
+          Back to Home
+        </a>
+        <a href="https://wa.me/919006194935"
+           target="_blank"
+           class="btn"
+           style="background:rgba(37,211,102,0.15);
+                  border:1px solid rgba(37,211,102,0.3);
+                  color:#25d366;">
+          <i class="fab fa-whatsapp"></i>
+          Report Issue
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.error-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+.error-container { max-width: 520px; width: 100%; text-align: center; }
+.error-number { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 2.5rem; }
+.en-4 { font-size: clamp(5rem,15vw,9rem); font-weight: 900; letter-spacing: -4px; line-height: 1; background: linear-gradient(135deg,#fa709a,#f7971e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.8; }
+.en-circle { position: relative; width: clamp(80px,15vw,130px); height: clamp(80px,15vw,130px); }
+.en-circle-inner { position: absolute; inset: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: clamp(1.5rem,4vw,2.5rem); }
+.en-orbit { position: absolute; inset: 0; border-radius: 50%; border: 1px dashed rgba(250,112,154,0.2); animation: orbit 8s linear infinite; }
+@keyframes orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.error-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 1rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.25rem; }
+.error-content h1 { font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 900; margin-bottom: 0.85rem; }
+.error-desc { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem; }
+.error-actions { display: flex; gap: 0.85rem; justify-content: center; flex-wrap: wrap; }
+@media (max-width: 480px) { .error-actions { flex-direction: column; } .error-actions .btn { width: 100%; justify-content: center; } }
+</style>
+{% endblock %}

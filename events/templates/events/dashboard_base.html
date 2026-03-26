@@ -1,0 +1,301 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Dashboard - EventSphere{% endblock %}</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <link rel="stylesheet" href="{% static 'events/css/style.css' %}"/>
+  <link rel="stylesheet" href="{% static 'events/css/dashboard.css' %}"/>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="dashboard-body">
+
+  <!-- ═══ SIDEBAR ════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <a href="{% url 'home' %}" class="sidebar-logo-link">
+        <div class="sidebar-logo-icon">
+          <i class="fas fa-star-of-life"></i>
+        </div>
+        <span class="sidebar-logo-text">
+          Event<strong>Sphere</strong>
+        </span>
+      </a>
+      <button class="sidebar-close" id="sidebarClose">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- User Profile -->
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar">
+        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+      </div>
+      <div class="sidebar-user-info">
+        <span class="sidebar-username">
+          {{ user.get_full_name|default:user.username }}
+        </span>
+        <span class="sidebar-role
+          {% if user.is_professor %}role-professor{% else %}role-student{% endif %}">
+          <i class="fas
+            {% if user.is_professor %}fa-chalkboard-teacher
+            {% else %}fa-user-graduate{% endif %}">
+          </i>
+          {{ user.role|title }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Nav Links -->
+    <nav class="sidebar-nav">
+
+      <div class="sidebar-nav-label">Main Menu</div>
+
+      {% if user.is_professor %}
+      <!-- Professor Menu -->
+      <a href="{% url 'professor_dashboard' %}"
+         class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'professor_events' %}"
+         class="sidebar-link {% if active_page == 'events' %}active{% endif %}">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <span>My Events</span>
+        <span class="sidebar-badge">{{ user.events.count }}</span>
+      </a>
+
+      <a href="{% url 'add_event' %}"
+         class="sidebar-link {% if active_page == 'add_event' %}active{% endif %}">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-plus-circle"></i>
+        </div>
+        <span>Add Event</span>
+      </a>
+
+      <div class="sidebar-nav-label">Explore</div>
+
+      <a href="{% url 'events' %}" class="sidebar-link">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-compass"></i>
+        </div>
+        <span>Browse Events</span>
+      </a>
+
+      {% else %}
+      <!-- Student Menu -->
+      <a href="{% url 'student_dashboard' %}"
+         class="sidebar-link {% if active_page == 'dashboard' %}active{% endif %}">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-home"></i>
+        </div>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'my_registrations' %}"
+         class="sidebar-link {% if active_page == 'registrations' %}active{% endif %}">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-ticket-alt"></i>
+        </div>
+        <span>My Tickets</span>
+        <span class="sidebar-badge">
+          {{ user.registrations.count }}
+        </span>
+      </a>
+
+      <div class="sidebar-nav-label">Explore</div>
+
+      <a href="{% url 'events' %}" class="sidebar-link">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-compass"></i>
+        </div>
+        <span>Browse Events</span>
+      </a>
+
+      {% endif %}
+
+      <div class="sidebar-nav-label">Account</div>
+
+      <a href="{% url 'home' %}" class="sidebar-link">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-globe"></i>
+        </div>
+        <span>Public Home</span>
+      </a>
+
+      <a href="{% url 'logout' %}"
+         class="sidebar-link sidebar-link-logout">
+        <div class="sidebar-link-icon">
+          <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <span>Logout</span>
+      </a>
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-card">
+        <i class="fas fa-shield-alt"></i>
+        <div>
+          <strong>Secure Session</strong>
+          <span>You are logged in</span>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- Sidebar Overlay (Mobile) -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ═══ MAIN CONTENT ═══════════════════════════ -->
+  <div class="dashboard-main" id="dashboardMain">
+
+    <!-- Top Header Bar -->
+    <header class="dash-topbar">
+      <div class="dash-topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="dash-breadcrumb">
+          <span class="breadcrumb-home">
+            <i class="fas fa-home"></i>
+          </span>
+          <i class="fas fa-chevron-right breadcrumb-sep"></i>
+          <span class="breadcrumb-current">
+            {% block breadcrumb %}Dashboard{% endblock %}
+          </span>
+        </div>
+      </div>
+
+      <div class="dash-topbar-right">
+        <!-- Search -->
+        <div class="topbar-search">
+          <i class="fas fa-search"></i>
+          <input type="text"
+                 placeholder="Search events..."
+                 onkeydown="if(event.key==='Enter')
+                   window.location='/events/?search='+this.value" />
+        </div>
+
+        <!-- Notifications -->
+        <div class="topbar-notif">
+          <button class="topbar-icon-btn" id="notifBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notif-dot"></span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <strong>Notifications</strong>
+              <span class="notif-count">New</span>
+            </div>
+            <div class="notif-item">
+              <div class="notif-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div>
+                <p>Welcome to EventSphere!</p>
+                <span>Just now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="topbar-profile" id="profileBtn">
+          <div class="topbar-avatar">
+            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+          </div>
+          <div class="topbar-user">
+            <span class="topbar-name">
+              {{ user.first_name|default:user.username }}
+            </span>
+            <span class="topbar-role">
+              {{ user.role|title }}
+            </span>
+          </div>
+          <i class="fas fa-chevron-down topbar-arrow"></i>
+
+          <!-- Profile Dropdown -->
+          <div class="profile-dropdown" id="profileDropdown">
+            <div class="profile-dd-header">
+              <div class="profile-dd-avatar">
+                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+              </div>
+              <div>
+                <strong>
+                  {{ user.get_full_name|default:user.username }}
+                </strong>
+                <span>{{ user.email }}</span>
+              </div>
+            </div>
+            <div class="profile-dd-divider"></div>
+            <a href="{% url 'home' %}" class="profile-dd-item">
+              <i class="fas fa-globe"></i> Public Home
+            </a>
+            <a href="{% url 'events' %}" class="profile-dd-item">
+              <i class="fas fa-compass"></i> Browse Events
+            </a>
+            <div class="profile-dd-divider"></div>
+            <a href="{% url 'logout' %}"
+               class="profile-dd-item profile-dd-logout">
+              <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="dash-messages">
+      {% for message in messages %}
+      <div class="dash-alert dash-alert-{{ message.tags }}">
+        <i class="fas fa-info-circle"></i>
+        {{ message }}
+        <button onclick="this.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page Content -->
+    <main class="dash-content">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+
+  <script src="{% static 'events/js/dashboard.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+
+  <div class="nav-section-label">Account</div>
+
+<!-- YE ADD KARO -->
+<a href="{% url 'profile' %}" class="nav-item">
+  <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
+  <span class="nav-text">My Profile</span>
+</a>
+
+<a href="{% url 'home' %}" class="nav-item">
+  <span class="nav-icon"><i class="fas fa-globe"></i></span>
+  <span class="nav-text">Public Home</span>
+</a>
+
+</body>
+</html>

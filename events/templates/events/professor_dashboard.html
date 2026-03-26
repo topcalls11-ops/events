@@ -1,0 +1,545 @@
+{% extends 'events/dashboard_base.html' %}
+
+{% block title %}Professor Dashboard - EventSphere{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Row -->
+<div class="pd-welcome-row">
+  <div>
+    <h1 class="pd-title">
+      Good {{ request.user.first_name|default:"Professor" }}! 👋
+    </h1>
+    <p class="pd-subtitle">
+      Here's what's happening with your events today.
+    </p>
+  </div>
+  <a href="{% url 'add_event' %}" class="btn btn-gradient">
+    <i class="fas fa-plus"></i>
+    New Event
+  </a>
+</div>
+
+<!-- Stats Cards -->
+<div class="pd-stats-grid">
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(108,99,255,0.2)">
+        <i class="fas fa-calendar-alt" style="color:#6c63ff"></i>
+      </div>
+      <span class="pd-stat-trend trend-up">
+        <i class="fas fa-arrow-up"></i> Active
+      </span>
+    </div>
+    <div class="pd-stat-num"
+         data-count="{{ my_events.count }}">0</div>
+    <div class="pd-stat-label">Total Events</div>
+    <div class="pd-stat-bar">
+      <div style="width:{{ my_events.count|default:0 }}0%;
+                  background:linear-gradient(135deg,#6c63ff,#4facfe)">
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(67,233,123,0.2)">
+        <i class="fas fa-check-circle" style="color:#43e97b"></i>
+      </div>
+      <span class="pd-stat-trend trend-up">
+        <i class="fas fa-arrow-up"></i> Live
+      </span>
+    </div>
+    <div class="pd-stat-num"
+         data-count="{% for e in my_events %}{% if e.approved %}1{% endif %}{% endfor %}"
+         id="approvedCount">
+      {% for e in my_events %}{% if e.approved %}{% endif %}{% endfor %}
+      {{ my_events|length }}
+    </div>
+    <div class="pd-stat-label">Approved Events</div>
+    <div class="pd-stat-bar">
+      <div style="width:70%;
+                  background:linear-gradient(135deg,#43e97b,#38f9d7)">
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(250,112,154,0.2)">
+        <i class="fas fa-users" style="color:#fa709a"></i>
+      </div>
+      <span class="pd-stat-trend trend-up">
+        <i class="fas fa-arrow-up"></i> Growing
+      </span>
+    </div>
+    <div class="pd-stat-num" data-count="{{ total_registrations }}">0</div>
+    <div class="pd-stat-label">Total Registrations</div>
+    <div class="pd-stat-bar">
+      <div style="width:80%;
+                  background:linear-gradient(135deg,#fa709a,#fee140)">
+      </div>
+    </div>
+  </div>
+
+  <div class="pd-stat-card">
+    <div class="pd-stat-top">
+      <div class="pd-stat-icon" style="background:rgba(79,172,254,0.2)">
+        <i class="fas fa-eye" style="color:#4facfe"></i>
+      </div>
+      <span class="pd-stat-trend trend-neutral">
+        <i class="fas fa-minus"></i> Stable
+      </span>
+    </div>
+    <div class="pd-stat-num" data-count="{{ my_events.count }}">0</div>
+    <div class="pd-stat-label">Published</div>
+    <div class="pd-stat-bar">
+      <div style="width:60%;
+                  background:linear-gradient(135deg,#4facfe,#00f2fe)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Grid -->
+<div class="pd-bottom-grid">
+
+  <!-- Recent Events -->
+  <div class="pd-card">
+    <div class="pd-card-header">
+      <h3><i class="fas fa-calendar-alt"></i> Recent Events</h3>
+      <a href="{% url 'professor_events' %}" class="pd-card-link">
+        View All <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if my_events %}
+    <div class="pd-event-list">
+      {% for event in my_events|slice:":5" %}
+      <div class="pd-event-item">
+        <div class="pd-event-thumb">
+          {% if event.image %}
+            <img src="{{ event.image.url }}" alt="" />
+          {% else %}
+            <div class="pd-event-thumb-ph">
+              <i class="fas fa-calendar"></i>
+            </div>
+          {% endif %}
+        </div>
+        <div class="pd-event-info">
+          <span class="pd-event-title">{{ event.title }}</span>
+          <span class="pd-event-date">
+            <i class="fas fa-calendar-alt"></i>
+            {{ event.date|date:"M d, Y" }}
+          </span>
+        </div>
+        <div class="pd-event-right">
+          {% if event.approved %}
+            <span class="pd-status approved">Live</span>
+          {% else %}
+            <span class="pd-status pending">Pending</span>
+          {% endif %}
+          <span class="pd-reg-count">
+            <i class="fas fa-users"></i>
+            {{ event.registered_count }}
+          </span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="pd-empty">
+      <i class="fas fa-calendar-plus"></i>
+      <p>No events yet. Create your first!</p>
+      <a href="{% url 'add_event' %}" class="btn btn-gradient btn-sm">
+        <i class="fas fa-plus"></i> Add Event
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Recent Registrations -->
+  <div class="pd-card">
+    <div class="pd-card-header">
+      <h3><i class="fas fa-users"></i> Recent Registrations</h3>
+    </div>
+
+    {% if recent_regs %}
+    <div class="pd-reg-list">
+      {% for reg in recent_regs %}
+      <div class="pd-reg-item">
+        <div class="pd-reg-avatar">
+          {{ reg.name|first|upper }}
+        </div>
+        <div class="pd-reg-info">
+          <span class="pd-reg-name">{{ reg.name }}</span>
+          <span class="pd-reg-event">{{ reg.event.title }}</span>
+        </div>
+        <span class="pd-reg-time">
+          {{ reg.registered_at|date:"M d" }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="pd-empty">
+      <i class="fas fa-user-clock"></i>
+      <p>No registrations yet</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* Welcome Row */
+.pd-welcome-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pd-title {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.pd-subtitle { font-size: 0.875rem; color: var(--text-muted); }
+
+/* Stats Grid */
+.pd-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.pd-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.pd-stat-card:hover {
+  border-color: rgba(108,99,255,0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.pd-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.pd-stat-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.pd-stat-trend {
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50px;
+}
+
+.trend-up {
+  background: rgba(67,233,123,0.15);
+  color: #43e97b;
+}
+
+.trend-neutral {
+  background: rgba(79,172,254,0.15);
+  color: #4facfe;
+}
+
+.pd-stat-num {
+  font-size: 2.2rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pd-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.pd-stat-bar {
+  height: 4px;
+  background: var(--glass-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pd-stat-bar div {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+/* Bottom Grid */
+.pd-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.pd-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.pd-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.pd-card-header h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.pd-card-header h3 i { color: var(--purple); }
+
+.pd-card-link {
+  font-size: 0.75rem;
+  color: var(--purple);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: var(--transition);
+}
+
+.pd-card-link:hover { color: var(--blue); }
+
+/* Event List */
+.pd-event-list { padding: 0.5rem 0; }
+
+.pd-event-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.5rem;
+  transition: var(--transition);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.pd-event-item:hover { background: rgba(108,99,255,0.05); }
+.pd-event-item:last-child { border-bottom: none; }
+
+.pd-event-thumb {
+  width: 42px; height: 42px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--dark-3);
+  flex-shrink: 0;
+}
+
+.pd-event-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.pd-event-thumb-ph {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--purple);
+  opacity: 0.4;
+}
+
+.pd-event-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pd-event-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-event-date {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+
+.pd-event-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.pd-status {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 50px;
+}
+
+.approved {
+  background: rgba(67,233,123,0.15);
+  color: #43e97b;
+}
+
+.pending {
+  background: rgba(247,151,30,0.15);
+  color: #f7971e;
+}
+
+.pd-reg-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Reg List */
+.pd-reg-list { padding: 0.5rem 0; }
+
+.pd-reg-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: var(--transition);
+}
+
+.pd-reg-item:hover { background: rgba(108,99,255,0.05); }
+.pd-reg-item:last-child { border-bottom: none; }
+
+.pd-reg-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--gradient-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+.pd-reg-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pd-reg-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.pd-reg-event {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-reg-time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* Empty */
+.pd-empty {
+  padding: 2.5rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.pd-empty i {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  opacity: 0.3;
+}
+
+.pd-empty p { font-size: 0.82rem; margin-bottom: 1rem; }
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .pd-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .pd-stats-grid { grid-template-columns: 1fr 1fr; }
+  .pd-bottom-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .pd-stats-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Count up for stat numbers
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.getAttribute('data-count')) || 0;
+    let count = 0;
+    const step = Math.max(1, Math.ceil(target / 30));
+    const timer = setInterval(() => {
+      count = Math.min(count + step, target);
+      el.textContent = count;
+      if (count >= target) clearInterval(timer);
+    }, 40);
+  });
+});
+</script>
+{% endblock %}

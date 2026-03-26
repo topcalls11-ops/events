@@ -1,0 +1,578 @@
+{% extends 'events/dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Browse Events - EventSphere{% endblock %}
+{% block breadcrumb %}Browse Events{% endblock %}
+
+{% block content %}
+
+<!-- ─── Page Header ───────────────────────────── -->
+<div class="browse-header">
+  <div>
+    <h1 class="pd-title">
+      Browse <span class="text-gradient">Events</span>
+    </h1>
+    <p class="pd-subtitle">
+      Discover amazing events happening across colleges
+    </p>
+  </div>
+</div>
+
+<!-- ─── Search + Filter Bar ──────────────────── -->
+<div class="browse-filter-bar glass-card">
+  <form method="GET" action="{% url 'events' %}" class="filter-form">
+
+    <!-- Search -->
+    <div class="browse-search-wrap">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        name="search"
+        value="{{ search_query }}"
+        placeholder="Search events, colleges..."
+        class="browse-search-input"
+        autocomplete="off"
+      />
+      {% if search_query %}
+      <a href="{% url 'events' %}" class="search-clear-btn">
+        <i class="fas fa-times"></i>
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- Category Pills -->
+    <div class="browse-filter-pills">
+      <a href="{% url 'events' %}{% if search_query %}?search={{ search_query }}{% endif %}"
+         class="bfilter-pill {% if not selected_category %}active{% endif %}">
+        All
+      </a>
+      {% for value, label in categories %}
+      <a href="?category={{ value }}{% if search_query %}&search={{ search_query }}{% endif %}"
+         class="bfilter-pill {% if selected_category == value %}active{% endif %}">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Submit -->
+    <button type="submit" class="btn btn-gradient"
+            style="white-space:nowrap;flex-shrink:0;">
+      <i class="fas fa-filter"></i>
+      Filter
+    </button>
+
+  </form>
+</div>
+
+<!-- ─── Results Info ──────────────────────────── -->
+<div class="browse-results-info">
+  {% if search_query or selected_category %}
+    <p>
+      <strong style="color:var(--purple)">{{ events|length }}</strong>
+      event{{ events|length|pluralize }} found
+      {% if search_query %}
+        for "<em style="color:var(--purple)">{{ search_query }}</em>"
+      {% endif %}
+      {% if selected_category %}
+        in <em style="color:var(--purple)">{{ selected_category }}</em>
+      {% endif %}
+    </p>
+    <a href="{% url 'events' %}" class="clear-all-btn">
+      <i class="fas fa-times-circle"></i> Clear filters
+    </a>
+  {% else %}
+    <p>
+      Showing
+      <strong style="color:var(--purple)">{{ events|length }}</strong>
+      events
+    </p>
+  {% endif %}
+</div>
+
+<!-- ─── Events Grid ───────────────────────────── -->
+{% if events %}
+<div class="browse-events-grid">
+  {% for event in events %}
+  <div class="browse-event-card glass-card">
+
+    <!-- Image -->
+    <div class="browse-card-img">
+      {% if event.image %}
+        <img src="{{ event.image.url }}" alt="{{ event.title }}" />
+      {% else %}
+        <div class="browse-card-img-ph">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+      {% endif %}
+
+      <!-- Status Badge -->
+      {% if event.is_upcoming %}
+        <span class="browse-badge badge-upcoming">
+          <span class="pulse-dot"></span> Upcoming
+        </span>
+      {% else %}
+        <span class="browse-badge badge-past">Ended</span>
+      {% endif %}
+
+      <!-- Category -->
+      <span class="browse-cat-tag">
+        {{ event.get_category_display }}
+      </span>
+    </div>
+
+    <!-- Body -->
+    <div class="browse-card-body">
+
+      <h3 class="browse-card-title">{{ event.title }}</h3>
+
+      <div class="browse-card-meta">
+        <div class="browse-meta-item">
+          <i class="fas fa-university"></i>
+          <span>{{ event.college }}</span>
+        </div>
+        <div class="browse-meta-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ event.date|date:"D, M d Y" }}</span>
+        </div>
+        <div class="browse-meta-item">
+          <i class="fas fa-clock"></i>
+          <span>{{ event.date|date:"h:i A" }}</span>
+        </div>
+        {% if event.venue %}
+        <div class="browse-meta-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>{{ event.venue }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Description -->
+      <p class="browse-card-desc">
+        {{ event.description|truncatechars:85 }}
+      </p>
+
+      <!-- Footer -->
+      <div class="browse-card-footer">
+        <div class="browse-spots">
+          <div class="browse-spots-bar">
+            <div style="width:{% widthratio event.registered_count event.max_participants 100 %}%;
+                        background:var(--gradient-1);max-width:100%;">
+            </div>
+          </div>
+          <span>{{ event.registered_count }}/{{ event.max_participants }}</span>
+        </div>
+
+        <a href="{% url 'event_detail' event.pk %}"
+           class="btn btn-gradient btn-sm">
+          View Details
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="browse-empty">
+  <div class="browse-empty-icon">
+    <i class="fas fa-search"></i>
+  </div>
+  <h2>No events found</h2>
+  <p>
+    {% if search_query %}
+      No events match "{{ search_query }}". Try something else.
+    {% elif selected_category %}
+      No events in this category yet.
+    {% else %}
+      No events available right now. Check back soon!
+    {% endif %}
+  </p>
+  {% if search_query or selected_category %}
+  <a href="{% url 'events' %}" class="btn btn-gradient mt-3">
+    <i class="fas fa-refresh"></i>
+    Show All Events
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+/* ─── Browse Header ─────────────────────────── */
+.browse-header {
+  margin-bottom: 1.5rem;
+}
+
+.pd-title {
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.text-gradient {
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pd-subtitle { font-size: 0.875rem; color: var(--text-muted); }
+
+/* ─── Filter Bar ────────────────────────────── */
+.browse-filter-bar {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  border-radius: var(--radius);
+}
+
+.filter-form {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Search */
+.browse-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.browse-search-wrap > i {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  pointer-events: none;
+}
+
+.browse-search-input {
+  width: 100%;
+  padding: 0.65rem 2.5rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+.browse-search-input::placeholder { color: var(--text-muted); }
+
+.browse-search-input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  transition: var(--transition);
+}
+
+.search-clear-btn:hover { color: #fa709a; }
+
+/* Filter Pills */
+.browse-filter-pills {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.bfilter-pill {
+  padding: 0.4rem 0.9rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.bfilter-pill:hover,
+.bfilter-pill.active {
+  background: rgba(108,99,255,0.2);
+  border-color: var(--purple);
+  color: var(--text-primary);
+}
+
+/* ─── Results Info ──────────────────────────── */
+.browse-results-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.clear-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.clear-all-btn:hover { color: #fa709a; }
+
+/* ─── Events Grid ───────────────────────────── */
+.browse-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Event Card */
+.browse-event-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+
+.browse-event-card:hover {
+  border-color: rgba(108,99,255,0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4),
+              0 0 20px rgba(108,99,255,0.15);
+}
+
+/* Card Image */
+.browse-card-img {
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+  background: var(--dark-3);
+  flex-shrink: 0;
+}
+
+.browse-card-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.browse-event-card:hover .browse-card-img img {
+  transform: scale(1.05);
+}
+
+.browse-card-img-ph {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--dark-3), #1e1e3f);
+  font-size: 2.5rem;
+  color: var(--purple);
+  opacity: 0.25;
+}
+
+/* Badges on image */
+.browse-badge {
+  position: absolute;
+  top: 10px; right: 10px;
+  padding: 0.22rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.badge-upcoming {
+  background: rgba(67,233,123,0.2);
+  border: 1px solid rgba(67,233,123,0.4);
+  color: #43e97b;
+}
+
+.badge-past {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-muted);
+  border: 1px solid var(--glass-border);
+}
+
+.browse-cat-tag {
+  position: absolute;
+  bottom: 10px; left: 10px;
+  padding: 0.2rem 0.6rem;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+  border-radius: 50px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Card Body */
+.browse-card-body {
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.browse-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.browse-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.browse-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.browse-meta-item i {
+  width: 13px;
+  color: var(--purple);
+  font-size: 0.7rem;
+  flex-shrink: 0;
+}
+
+.browse-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* Card Footer */
+.browse-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--glass-border);
+  margin-top: auto;
+}
+
+.browse-spots {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.browse-spots-bar {
+  width: 55px;
+  height: 4px;
+  background: var(--glass-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.browse-spots-bar div {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.browse-spots span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.btn-sm {
+  padding: 0.45rem 1rem;
+  font-size: 0.78rem;
+}
+
+/* ─── Empty State ───────────────────────────── */
+.browse-empty {
+  text-align: center;
+  padding: 5rem 2rem;
+}
+
+.browse-empty-icon {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: rgba(108,99,255,0.1);
+  border: 1px dashed rgba(108,99,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+  color: var(--purple);
+  opacity: 0.4;
+}
+
+.browse-empty h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.browse-empty p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Pulse dot */
+.pulse-dot {
+  width: 6px; height: 6px;
+  background: #43e97b;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(67,233,123,0.4); }
+  50% { box-shadow: 0 0 0 5px rgba(67,233,123,0); }
+}
+
+/* ─── Responsive ────────────────────────────── */
+@media (max-width: 768px) {
+  .filter-form { flex-direction: column; align-items: stretch; }
+  .browse-filter-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.25rem;
+  }
+  .browse-results-info { flex-direction: column; align-items: flex-start; gap: 0.4rem; }
+  .browse-events-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .browse-events-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}

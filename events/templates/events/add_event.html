@@ -1,0 +1,529 @@
+{% extends 'events/dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Add Event - EventSphere{% endblock %}
+{% block breadcrumb %}Add New Event{% endblock %}
+
+{% block content %}
+
+<div class="form-page-wrap">
+
+  <div class="form-page-grid">
+
+    <!-- ─── Left: Form ──────────────────────── -->
+    <div class="form-main">
+      <div class="form-card">
+
+        <!-- Header -->
+        <div class="form-card-header">
+          <div class="form-header-icon">
+            <i class="fas fa-calendar-plus"></i>
+          </div>
+          <div>
+            <h1>Create New Event</h1>
+            <p>Fill in the details to publish your event</p>
+          </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data"
+              class="event-form" id="eventForm">
+          {% csrf_token %}
+
+          <!-- Basic Info -->
+          <div class="form-section">
+            <div class="form-section-label">
+              <i class="fas fa-info-circle"></i>
+              Basic Information
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required-label">Event Title</label>
+              {{ form.title }}
+              {% if form.title.errors %}
+                <div class="field-error">
+                  {% for e in form.title.errors %}
+                    <span><i class="fas fa-exclamation-circle"></i> {{ e }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="form-group">
+              <label class="form-label required-label">Description</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="field-error">
+                  {% for e in form.description.errors %}
+                    <span><i class="fas fa-exclamation-circle"></i> {{ e }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              <div class="char-count">
+                <span id="descCount">0</span> characters
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label required-label">College Name</label>
+                {{ form.college }}
+                {% if form.college.errors %}
+                  <div class="field-error">
+                    {% for e in form.college.errors %}
+                      <span><i class="fas fa-exclamation-circle"></i> {{ e }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label required-label">Category</label>
+                {{ form.category }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Date & Venue -->
+          <div class="form-section">
+            <div class="form-section-label">
+              <i class="fas fa-map-marker-alt"></i>
+              Date & Venue
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label required-label">Date & Time</label>
+                {{ form.date }}
+                {% if form.date.errors %}
+                  <div class="field-error">
+                    {% for e in form.date.errors %}
+                      <span><i class="fas fa-exclamation-circle"></i> {{ e }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Venue</label>
+                {{ form.venue }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Max Participants</label>
+              {{ form.max_participants }}
+              <p class="form-hint">
+                <i class="fas fa-info-circle"></i>
+                Maximum students who can register
+              </p>
+            </div>
+          </div>
+
+          <!-- Image Upload -->
+          <div class="form-section">
+            <div class="form-section-label">
+              <i class="fas fa-image"></i>
+              Event Image (Optional)
+            </div>
+
+            <div class="image-upload-area" id="imageUploadArea">
+              <input type="file" name="image" id="imageInput"
+                     accept="image/*" hidden />
+              <div class="upload-placeholder" id="uploadPlaceholder">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <strong>Click or drag to upload</strong>
+                <span>PNG, JPG up to 5MB</span>
+              </div>
+              <img id="imagePreview" src="" alt="Preview"
+                   style="display:none; width:100%; height:100%;
+                          object-fit:cover; border-radius:10px;" />
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="form-actions">
+            <a href="{% url 'professor_events' %}" class="btn btn-ghost">
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-gradient" id="submitBtn">
+              <i class="fas fa-paper-plane"></i>
+              Submit for Approval
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+    <!-- ─── Right: Tips ──────────────────────── -->
+    <div class="form-sidebar">
+
+      <div class="tips-card glass-card">
+        <h3>
+          <i class="fas fa-lightbulb"></i>
+          Tips for a Great Event
+        </h3>
+        <ul class="tips-list">
+          <li><i class="fas fa-check"></i> Write a clear, catchy title</li>
+          <li><i class="fas fa-check"></i> Add detailed description</li>
+          <li><i class="fas fa-check"></i> Set realistic participant limit</li>
+          <li><i class="fas fa-check"></i> Upload an attractive banner</li>
+          <li><i class="fas fa-check"></i> Mention venue clearly</li>
+        </ul>
+      </div>
+
+      <div class="approval-card glass-card">
+        <h3>
+          <i class="fas fa-shield-alt"></i>
+          Approval Process
+        </h3>
+        <div class="approval-steps">
+          <div class="approval-step active">
+            <div class="approval-dot"></div>
+            <div>
+              <strong>Submit Event</strong>
+              <span>Fill and submit the form</span>
+            </div>
+          </div>
+          <div class="approval-line"></div>
+          <div class="approval-step">
+            <div class="approval-dot"></div>
+            <div>
+              <strong>Admin Review</strong>
+              <span>Admin reviews your event</span>
+            </div>
+          </div>
+          <div class="approval-line"></div>
+          <div class="approval-step">
+            <div class="approval-dot"></div>
+            <div>
+              <strong>Goes Live</strong>
+              <span>Students can register</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+.form-page-wrap { padding-bottom: 2rem; }
+
+.form-page-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.form-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.form-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--glass-border);
+  background: linear-gradient(135deg,
+    rgba(108,99,255,0.1), rgba(79,172,254,0.05));
+}
+
+.form-header-icon {
+  width: 50px; height: 50px;
+  border-radius: 12px;
+  background: rgba(108,99,255,0.2);
+  border: 1px solid rgba(108,99,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: var(--purple);
+  flex-shrink: 0;
+}
+
+.form-card-header h1 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 0.15rem;
+}
+
+.form-card-header p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.event-form { padding: 0; }
+
+.form-section {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.form-section-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.form-section-label i { color: var(--purple); }
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.required-label::after { content: ' *'; color: #fa709a; }
+
+.char-count {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+.form-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.form-hint i { color: var(--purple); font-size: 0.65rem; }
+
+/* Image Upload */
+.image-upload-area {
+  height: 160px;
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  overflow: hidden;
+}
+
+.image-upload-area:hover {
+  border-color: var(--purple);
+  background: rgba(108,99,255,0.05);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+}
+
+.upload-placeholder i {
+  font-size: 1.8rem;
+  color: var(--purple);
+  opacity: 0.4;
+}
+
+.upload-placeholder strong {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.upload-placeholder span { font-size: 0.72rem; }
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 2rem;
+}
+
+/* Field Error */
+.field-error {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.field-error span {
+  font-size: 0.72rem;
+  color: #fa709a;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Sidebar */
+.form-sidebar {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.tips-card, .approval-card { padding: 1.25rem; }
+
+.tips-card h3, .approval-card h3 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+.tips-card h3 i { color: #f7971e; }
+.approval-card h3 i { color: var(--purple); }
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.tips-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.tips-list i { color: #43e97b; font-size: 0.65rem; margin-top: 0.2rem; }
+
+/* Approval Steps */
+.approval-steps { display: flex; flex-direction: column; }
+
+.approval-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.approval-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--glass-border);
+  border: 2px solid var(--glass-border);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.approval-step.active .approval-dot {
+  background: var(--purple);
+  border-color: var(--purple);
+  box-shadow: 0 0 8px rgba(108,99,255,0.5);
+}
+
+.approval-step div { display: flex; flex-direction: column; }
+.approval-step strong { font-size: 0.78rem; font-weight: 700; }
+.approval-step span { font-size: 0.68rem; color: var(--text-muted); }
+
+.approval-line {
+  width: 1px; height: 20px;
+  background: var(--glass-border);
+  margin: 4px 0 4px 4px;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .form-page-grid { grid-template-columns: 1fr; }
+  .form-sidebar { position: static; }
+}
+
+@media (max-width: 640px) {
+  .form-row-2 { grid-template-columns: 1fr; }
+  .form-section { padding: 1.25rem; }
+  .form-actions { padding: 1.25rem; }
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+// Image upload preview
+const uploadArea  = document.getElementById('imageUploadArea');
+const imageInput  = document.getElementById('imageInput');
+const preview     = document.getElementById('imagePreview');
+const placeholder = document.getElementById('uploadPlaceholder');
+
+uploadArea.addEventListener('click', () => imageInput.click());
+
+imageInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    uploadArea.style.border = '2px solid var(--purple)';
+  };
+  reader.readAsDataURL(file);
+});
+
+// Drag & Drop
+uploadArea.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadArea.style.borderColor = 'var(--purple)';
+});
+
+uploadArea.addEventListener('dragleave', () => {
+  uploadArea.style.borderColor = '';
+});
+
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    imageInput.files = e.dataTransfer.files;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      preview.src = ev.target.result;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Char counter
+const desc  = document.querySelector('textarea[name="description"]');
+const count = document.getElementById('descCount');
+if (desc && count) {
+  count.textContent = desc.value.length;
+  desc.addEventListener('input', () => {
+    count.textContent = desc.value.length;
+  });
+}
+
+// Submit loading
+document.getElementById('eventForm').addEventListener('submit', () => {
+  const btn = document.getElementById('submitBtn');
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

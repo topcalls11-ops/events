@@ -1,0 +1,707 @@
+{% extends 'events/dashboard_base.html' %}
+{% load static %}
+
+{% block title %}Profile - EventSphere{% endblock %}
+{% block breadcrumb %}My Profile{% endblock %}
+
+{% block content %}
+
+<div class="profile-page">
+
+  <!-- Profile Header -->
+  <div class="profile-header-card">
+    <div class="profile-cover"></div>
+    <div class="profile-header-body">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-big">
+          {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        </div>
+        <div class="profile-online-dot"></div>
+      </div>
+      <div class="profile-header-info">
+        <div class="phi-left">
+          <h1>
+            {{ user.get_full_name|default:user.username }}
+          </h1>
+          <div class="profile-meta-row">
+            <span class="profile-role-badge
+              {% if user.is_professor %}prof-badge{% else %}stu-badge{% endif %}">
+              <i class="fas
+                {% if user.is_professor %}fa-chalkboard-teacher
+                {% else %}fa-user-graduate{% endif %}">
+              </i>
+              {{ user.role|title }}
+            </span>
+            {% if user.college %}
+            <span class="profile-meta-item">
+              <i class="fas fa-university"></i>
+              {{ user.college }}
+            </span>
+            {% endif %}
+            <span class="profile-meta-item">
+              <i class="fas fa-calendar-alt"></i>
+              Joined {{ user.date_joined|date:"M Y" }}
+            </span>
+          </div>
+        </div>
+        <div class="phi-right">
+          <a href="{% url 'logout' %}"
+             class="btn btn-ghost btn-sm">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+
+    <!-- Left Column -->
+    <div class="profile-left">
+
+      <!-- Info Card -->
+      <div class="profile-info-card">
+        <div class="pic-header">
+          <h3>
+            <i class="fas fa-user"></i>
+            Account Information
+          </h3>
+        </div>
+        <div class="pic-body">
+
+          <div class="info-row">
+            <div class="info-label">
+              <i class="fas fa-user"></i>
+              Full Name
+            </div>
+            <div class="info-value">
+              {{ user.get_full_name|default:"Not set" }}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">
+              <i class="fas fa-at"></i>
+              Username
+            </div>
+            <div class="info-value">
+              @{{ user.username }}
+            </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-label">
+              <i class="fas fa-envelope"></i>
+              Email
+            </div>
+            <div class="info-value">
+              {{ user.email|default:"Not set" }}
+            </div>
+          </div>
+
+          {% if user.phone %}
+          <div class="info-row">
+            <div class="info-label">
+              <i class="fas fa-phone"></i>
+              Phone
+            </div>
+            <div class="info-value">
+              {{ user.phone }}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if user.college %}
+          <div class="info-row">
+            <div class="info-label">
+              <i class="fas fa-university"></i>
+              College
+            </div>
+            <div class="info-value">
+              {{ user.college }}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="info-row">
+            <div class="info-label">
+              <i class="fas fa-id-badge"></i>
+              Role
+            </div>
+            <div class="info-value">
+              <span class="profile-role-badge
+                {% if user.is_professor %}prof-badge{% else %}stu-badge{% endif %}">
+                {{ user.role|title }}
+              </span>
+            </div>
+          </div>
+
+          <div class="info-row" style="border:none">
+            <div class="info-label">
+              <i class="fas fa-clock"></i>
+              Member Since
+            </div>
+            <div class="info-value">
+              {{ user.date_joined|date:"F d, Y" }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Security Card -->
+      <div class="profile-info-card">
+        <div class="pic-header">
+          <h3>
+            <i class="fas fa-shield-alt"></i>
+            Security
+          </h3>
+        </div>
+        <div class="pic-body">
+          <div class="security-item">
+            <div class="si-left">
+              <div class="si-icon green">
+                <i class="fas fa-lock"></i>
+              </div>
+              <div>
+                <strong>Password</strong>
+                <span>Last changed: Unknown</span>
+              </div>
+            </div>
+            <a href="{% url 'forgot_password' %}"
+               class="btn btn-ghost btn-sm">
+              Change
+            </a>
+          </div>
+          <div class="security-item" style="border:none">
+            <div class="si-left">
+              <div class="si-icon blue">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div>
+                <strong>Email</strong>
+                <span>{{ user.email }}</span>
+              </div>
+            </div>
+            <span class="verified-badge">
+              <i class="fas fa-check"></i>
+              Verified
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="profile-right">
+
+      <!-- Stats -->
+      <div class="profile-stats-grid">
+        {% if user.is_professor %}
+        <div class="profile-stat-card">
+          <div class="psc-icon purple">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="psc-num"
+               data-count="{{ my_events_count }}">0</div>
+          <div class="psc-label">Events Created</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="psc-icon green">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="psc-num"
+               data-count="{{ total_registrations }}">0</div>
+          <div class="psc-label">Total Registrations</div>
+        </div>
+        {% else %}
+        <div class="profile-stat-card">
+          <div class="psc-icon purple">
+            <i class="fas fa-ticket-alt"></i>
+          </div>
+          <div class="psc-num"
+               data-count="{{ registrations_count }}">0</div>
+          <div class="psc-label">Events Registered</div>
+        </div>
+        <div class="profile-stat-card">
+          <div class="psc-icon green">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div class="psc-num"
+               data-count="{{ upcoming_count }}">0</div>
+          <div class="psc-label">Upcoming Events</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="profile-info-card">
+        <div class="pic-header">
+          <h3>
+            <i class="fas fa-bolt"></i>
+            Quick Actions
+          </h3>
+        </div>
+        <div class="quick-actions-grid">
+          {% if user.is_professor %}
+          <a href="{% url 'professor_dashboard' %}"
+             class="qa-btn">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="{% url 'add_event' %}" class="qa-btn">
+            <i class="fas fa-plus-circle"></i>
+            <span>Add Event</span>
+          </a>
+          <a href="{% url 'professor_events' %}" class="qa-btn">
+            <i class="fas fa-calendar-alt"></i>
+            <span>My Events</span>
+          </a>
+          {% else %}
+          <a href="{% url 'student_dashboard' %}"
+             class="qa-btn">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="{% url 'events' %}" class="qa-btn">
+            <i class="fas fa-compass"></i>
+            <span>Browse Events</span>
+          </a>
+          <a href="{% url 'my_registrations' %}" class="qa-btn">
+            <i class="fas fa-ticket-alt"></i>
+            <span>My Tickets</span>
+          </a>
+          {% endif %}
+          <a href="{% url 'forgot_password' %}" class="qa-btn">
+            <i class="fas fa-key"></i>
+            <span>Change Password</span>
+          </a>
+          <a href="{% url 'contact' %}" class="qa-btn">
+            <i class="fas fa-headset"></i>
+            <span>Get Support</span>
+          </a>
+          <a href="{% url 'logout' %}"
+             class="qa-btn qa-logout">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* ─── Profile Header ────────────────────────── */
+.profile-header-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.profile-cover {
+  height: 120px;
+  background: linear-gradient(135deg,
+    rgba(108,99,255,0.3),
+    rgba(79,172,254,0.2),
+    rgba(250,112,154,0.15));
+  position: relative;
+}
+
+.profile-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(255,255,255,0.02) 20px,
+    rgba(255,255,255,0.02) 40px
+  );
+}
+
+.profile-header-body {
+  padding: 0 1.75rem 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  margin-top: -40px;
+  flex-shrink: 0;
+}
+
+.profile-avatar-big {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--gradient-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  border: 3px solid var(--dark-2);
+  box-shadow: 0 0 20px rgba(108,99,255,0.4);
+}
+
+.profile-online-dot {
+  position: absolute;
+  bottom: 4px; right: 4px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: #43e97b;
+  border: 2px solid var(--dark-2);
+}
+
+.profile-header-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 0.75rem;
+}
+
+.phi-left h1 {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.3px;
+}
+
+.profile-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.profile-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.prof-badge {
+  background: rgba(251,146,60,0.12);
+  color: #fb923c;
+  border: 1px solid rgba(251,146,60,0.25);
+}
+
+.stu-badge {
+  background: rgba(96,165,250,0.12);
+  color: #60a5fa;
+  border: 1px solid rgba(96,165,250,0.25);
+}
+
+.profile-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.profile-meta-item i {
+  font-size: 0.7rem;
+  color: var(--purple);
+}
+
+/* ─── Profile Grid ──────────────────────────── */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ─── Info Card ─────────────────────────────── */
+.profile-info-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+.profile-info-card:last-child { margin-bottom: 0; }
+
+.pic-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.pic-header h3 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pic-header h3 i { color: var(--purple); }
+
+.pic-body { padding: 0.5rem 0; }
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 1rem;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.info-label i {
+  width: 14px;
+  color: var(--purple);
+  font-size: 0.72rem;
+}
+
+.info-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* Security */
+.security-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 1rem;
+}
+
+.si-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.si-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+}
+
+.si-icon.green {
+  background: rgba(67,233,123,0.1);
+  color: #43e97b;
+  border: 1px solid rgba(67,233,123,0.2);
+}
+
+.si-icon.blue {
+  background: rgba(79,172,254,0.1);
+  color: #4facfe;
+  border: 1px solid rgba(79,172,254,0.2);
+}
+
+.si-left div {
+  display: flex;
+  flex-direction: column;
+}
+
+.si-left strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.si-left span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #43e97b;
+  background: rgba(67,233,123,0.1);
+  border: 1px solid rgba(67,233,123,0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 50px;
+}
+
+/* ─── Stats ─────────────────────────────────── */
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.profile-stat-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.profile-stat-card:hover {
+  border-color: rgba(108,99,255,0.3);
+  transform: translateY(-2px);
+}
+
+.psc-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  margin: 0 auto 0.85rem;
+}
+
+.psc-icon.purple {
+  background: rgba(108,99,255,0.15);
+  color: var(--purple);
+  border: 1px solid rgba(108,99,255,0.25);
+}
+
+.psc-icon.green {
+  background: rgba(67,233,123,0.12);
+  color: #43e97b;
+  border: 1px solid rgba(67,233,123,0.2);
+}
+
+.psc-num {
+  font-size: 2rem;
+  font-weight: 900;
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+
+.psc-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Quick Actions */
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.qa-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.85rem 0.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  cursor: pointer;
+  text-align: center;
+}
+
+.qa-btn i {
+  font-size: 1.1rem;
+  color: var(--purple);
+  transition: var(--transition);
+}
+
+.qa-btn:hover {
+  background: rgba(108,99,255,0.08);
+  border-color: rgba(108,99,255,0.3);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.qa-logout { }
+.qa-logout i { color: #fa709a; }
+.qa-logout:hover {
+  background: rgba(250,112,154,0.08);
+  border-color: rgba(250,112,154,0.3);
+}
+
+/* ─── Responsive ────────────────────────────── */
+@media (max-width: 968px) {
+  .profile-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .profile-header-body { flex-direction: column; align-items: flex-start; }
+  .profile-stats-grid { grid-template-columns: 1fr 1fr; }
+  .quick-actions-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.getAttribute('data-count')) || 0;
+    if (target === 0) return;
+    let count = 0;
+    const step = Math.max(1, Math.ceil(target / 20));
+    const timer = setInterval(() => {
+      count = Math.min(count + step, target);
+      el.textContent = count;
+      if (count >= target) clearInterval(timer);
+    }, 50);
+  });
+});
+</script>
+{% endblock %}
