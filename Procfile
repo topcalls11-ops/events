@@ -1,1 +1,1 @@
-web: gunicorn project.wsgi
+web: gunicorn college_events.wsgi --log-file -

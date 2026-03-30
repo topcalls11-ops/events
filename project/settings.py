@@ -2,17 +2,15 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# .env load karo
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = '3g741hnega22-yl7990dykt2hi9w&#z^2*53)j5w76%cz^ub&_'
+SECRET_KEY = os.getenv('SECRET_KEY', '3g741hnega22-yl7990dykt2hi9w&#z^2*53)j5w76%cz^ub&_')
 
-DEBUG = False
-import os
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['events-7jcp.onrender.com']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -64,9 +62,7 @@ DATABASES = {
 AUTH_USER_MODEL = 'users.CustomUser'
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 
 
 MEDIA_URL = '/media/'

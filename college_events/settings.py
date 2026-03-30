@@ -9,10 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = '3g741hnega22-yl7990dykt2hi9w&#z^2*53)j5w76%cz^ub&_'
 
-DEBUG = False
+DEBUG = True
 import os
 
-ALLOWED_HOSTS = ['events-7jcp.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     'django.contrib.admin',

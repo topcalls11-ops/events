@@ -21,6 +21,7 @@ urlpatterns = [
     # Student
     path('student/dashboard/', views.student_dashboard_view, name='student_dashboard'),
     path('student/registrations/', views.my_registrations_view, name='my_registrations'),
-]
 
-path('profile/', views.profile_view, name='profile'),
+    # Profile
+    path('profile/', views.profile_view, name='profile'),
+]
